@@ -1,0 +1,7 @@
+---
+# Локальная папка с картинками в репозитории (заливается на сервер).
+static_local_dir: "{{ playbook_dir }}/files/images"
+# Куда раскладываем на сервере (совпадает с {{ nginx_web_root }}/images).
+static_remote_dir: /var/www/images
+static_owner: www-data
+static_group: www-data

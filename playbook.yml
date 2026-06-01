@@ -1,0 +1,27 @@
+---
+# Плейбук настройки сервера раздачи статики.
+# Запуск: ansible-playbook playbook.yml
+# Порядок ролей важен:
+#   common -> базовые пакеты/утилиты
+#   users  -> группы и пользователи (тут же ставится zsh-пакет, если он кому-то нужен как shell)
+#   zsh    -> oh-my-zsh для пользователей с shell=zsh (пользователи уже созданы)
+#   ssh    -> хардненинг sshd (root-логин выключается ПОСЛЕ того как мы подключились под deploy)
+#   nginx  -> установка и vhost
+#   static -> заливка картинок
+- name: Configure static file server
+  hosts: static_servers
+  become: true
+  gather_facts: true
+  roles:
+    - role: common
+      tags: [common, packages]
+    - role: users
+      tags: [users]
+    - role: zsh
+      tags: [zsh]
+    - role: ssh
+      tags: [ssh]
+    - role: nginx
+      tags: [nginx]
+    - role: static
+      tags: [static, content]

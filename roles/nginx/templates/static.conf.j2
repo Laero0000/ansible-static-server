@@ -1,0 +1,38 @@
+# {{ ansible_managed }}
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    server_name {{ nginx_server_name }};
+
+    root {{ nginx_web_root }};
+
+    # Логирование запросов (требование задания).
+    access_log {{ nginx_access_log }};
+    error_log  {{ nginx_error_log }};
+
+    # gzip для сжимаемой статики. В server-контексте, чтобы не дублировать
+    # `gzip on;` из http{} в дефолтном nginx.conf. Растровые jpg/png уже сжаты.
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_comp_level 5;
+    gzip_proxied any;
+    gzip_types {{ nginx_gzip_types | join(' ') }};
+
+    # /images        -> листинг структуры файлов (autoindex)
+    # /images/<file> -> отдача самого файла
+    location {{ nginx_images_location }} {
+        autoindex on;
+        autoindex_exact_size off;
+        autoindex_localtime on;
+
+        # Кэширование статики со сроком истечения {{ nginx_cache_expires }}.
+        # Одна директива expires ставит и Expires, и Cache-Control: max-age
+        # (для 1h = 3600). Отдельный add_header не нужен -> нет дубля заголовка.
+        expires {{ nginx_cache_expires }};
+    }
+
+    location = / {
+        return 302 {{ nginx_images_location }}/;
+    }
+}

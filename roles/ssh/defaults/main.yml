@@ -1,0 +1,6 @@
+---
+# Требования задания. Вынесено в vars -> легко поменять политику.
+ssh_permit_root_login: "no"
+ssh_permit_empty_passwords: "no"
+ssh_log_level: "VERBOSE"
+ssh_x11_forwarding: "no"

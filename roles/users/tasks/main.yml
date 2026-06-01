@@ -1,0 +1,54 @@
+---
+- name: Create custom groups
+  ansible.builtin.group:
+    name: "{{ item.name }}"
+    gid: "{{ item.gid | default(omit) }}"
+    state: present
+  loop: "{{ custom_groups }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+# Нельзя задать пользователю shell=zsh, если zsh не установлен -> ставим заранее,
+# но только если он реально кому-то нужен (не тащим пакет зря).
+- name: Ensure zsh is installed when any present user requests it
+  ansible.builtin.apt:
+    name: zsh
+    state: present
+  when: users | selectattr('state', 'defined') | selectattr('state', 'equalto', 'present')
+        | map(attribute='shell') | select('defined')
+        | select('search', 'zsh') | list | length > 0
+
+- name: Create / update users
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    shell: "{{ item.shell | default('/bin/bash') }}"
+    groups: "{{ item.groups | default([]) }}"
+    append: false
+    password: "{{ item.password | default(omit) }}"
+    # on_create: пароль ставится только при создании юзера.
+    # always сравнивал бы shadow-хеш каждый прогон и репортил changed -> не идемпотентно.
+    update_password: on_create
+    state: present
+    create_home: true
+  loop: "{{ users | selectattr('state', 'defined') | selectattr('state', 'equalto', 'present') | list }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Deploy authorized SSH keys
+  ansible.posix.authorized_key:
+    user: "{{ item.name }}"
+    key: "{{ item.ssh_key }}"
+    state: present
+  loop: "{{ users | selectattr('state', 'defined') | selectattr('state', 'equalto', 'present')
+            | selectattr('ssh_key', 'defined') | list }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Remove users
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    state: absent
+    remove: "{{ item.remove | default(false) }}"
+  loop: "{{ users | selectattr('state', 'defined') | selectattr('state', 'equalto', 'absent') | list }}"
+  loop_control:
+    label: "{{ item.name }}"

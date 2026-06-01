@@ -1,0 +1,5 @@
+---
+zsh_omz_repo: https://github.com/ohmyzsh/ohmyzsh.git
+zsh_omz_theme: robbyrussell
+zsh_omz_plugins:
+  - git

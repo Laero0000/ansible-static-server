@@ -1,0 +1,46 @@
+---
+# Ставим oh-my-zsh только пользователям с shell=zsh (требование задания).
+# Пользователи уже созданы ролью users, zsh-пакет тоже стоит.
+- name: Build list of zsh users
+  ansible.builtin.set_fact:
+    zsh_users: >-
+      {{ users | selectattr('state', 'defined') | selectattr('state', 'equalto', 'present')
+         | selectattr('shell', 'defined') | selectattr('shell', 'search', 'zsh') | list }}
+
+# Клонируем от root (не become_user). Become на непривилегированного юзера
+# требует передачи временных файлов через setfacl/ACL, что ломается без пакета
+# acl на таргете. Проще склонировать root'ом и затем выставить владельца.
+- name: Install oh-my-zsh for zsh users
+  ansible.builtin.git:
+    repo: "{{ zsh_omz_repo }}"
+    dest: "/home/{{ item.name }}/.oh-my-zsh"
+    depth: 1
+    version: master
+    # creates-семантика: повторный прогон не перекачивает репозиторий.
+    update: false
+  loop: "{{ zsh_users }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+# Репозиторий склонирован root'ом -> возвращаем владельца пользователю.
+# recurse + правильный owner идемпотентны: второй прогон не меняет ничего.
+- name: Set ownership of oh-my-zsh to its user
+  ansible.builtin.file:
+    path: "/home/{{ item.name }}/.oh-my-zsh"
+    owner: "{{ item.name }}"
+    group: "{{ item.name }}"
+    recurse: true
+  loop: "{{ zsh_users }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Deploy .zshrc for zsh users
+  ansible.builtin.template:
+    src: zshrc.j2
+    dest: "/home/{{ item.name }}/.zshrc"
+    owner: "{{ item.name }}"
+    group: "{{ item.name }}"
+    mode: "0644"
+  loop: "{{ zsh_users }}"
+  loop_control:
+    label: "{{ item.name }}"

@@ -1,0 +1,10 @@
+*.retry
+__pycache__/
+*.pyc
+.vscode/
+.idea/
+
+# ssh-ключи НЕ коммитим. Генерятся локально через scripts/setup.sh
+# (одноразовый ключ только для тест-контейнера).
+docker/keys/*
+!docker/keys/.gitkeep

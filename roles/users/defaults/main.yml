@@ -1,0 +1,15 @@
+---
+# Кастомные группы (создаются до пользователей, чтобы их можно было назначить).
+# Пример элемента: { name: developers }  или  { name: web, gid: 5005 }
+custom_groups: []
+
+# Список пользователей. Поля задаются через vars (group_vars/all.yml):
+#   name      - имя пользователя (обязательно)
+#   state     - present | absent
+#   shell     - /bin/bash | /usr/bin/zsh | ...
+#   groups    - список доп. групп (в т.ч. кастомных)
+#   password  - ХЕШ пароля (sha512 crypt), не plaintext. Генерация:
+#               python3 -c 'import crypt;print(crypt.crypt("pass",crypt.mksalt(crypt.METHOD_SHA512)))'
+#   ssh_key   - публичный ключ для входа по ssh
+#   remove    - true: при state=absent удалить домашний каталог (по умолчанию false)
+users: []

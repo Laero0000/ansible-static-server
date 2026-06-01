@@ -1,0 +1,50 @@
+---
+# ============================================================================
+# Конфигурация окружения. Меняй здесь - роли подхватят.
+# ============================================================================
+
+# --- common: доп. утилиты (легко расширяемый список) ---
+common_full_upgrade: false
+common_packages:
+  - htop
+  - ncdu
+  - git
+  - nano
+
+# --- users: кастомные группы ---
+custom_groups:
+  - name: developers
+  - name: webadmins
+
+# --- users: пользователи ---
+# password - ХЕШ (sha512). Сгенерировать:
+#   python3 -c 'import crypt;print(crypt.crypt("PASS",crypt.mksalt(crypt.METHOD_SHA512)))'
+# ssh_key ниже - тестовый публичный ключ из docker/keys (ТОЛЬКО для теста).
+users:
+  - name: alice
+    state: present
+    shell: /usr/bin/zsh           # получит oh-my-zsh (роль zsh)
+    groups: [developers, sudo]
+    password: "$6$2I1mz8cdh/NMFYzS$KjScs9rGTdvxCiGlEe3dbVMzYo8zM1OnTQYEwCDBZALPcCPfuoTIr.b0b34q/Y.GTb4TjbE4vvc1GAl.ZOY/Y0"
+    ssh_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHxzUgWbs8KMvh9BDHEi+kFljy9RGXgEOXqGhEQgW7/s ansible-test-key DO-NOT-REUSE"
+
+  - name: bob
+    state: present
+    shell: /bin/bash              # bash -> oh-my-zsh НЕ ставится
+    groups: [webadmins]
+    password: "$6$2I1mz8cdh/NMFYzS$KjScs9rGTdvxCiGlEe3dbVMzYo8zM1OnTQYEwCDBZALPcCPfuoTIr.b0b34q/Y.GTb4TjbE4vvc1GAl.ZOY/Y0"
+    ssh_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHxzUgWbs8KMvh9BDHEi+kFljy9RGXgEOXqGhEQgW7/s ansible-test-key DO-NOT-REUSE"
+
+  # Пример удаления пользователя (демонстрация state=absent).
+  - name: olduser
+    state: absent
+    remove: true
+
+# --- ssh: хардненинг (значения по заданию) ---
+ssh_permit_root_login: "no"
+ssh_permit_empty_passwords: "no"
+ssh_log_level: "VERBOSE"
+ssh_x11_forwarding: "no"
+
+# --- nginx ---
+nginx_cache_expires: 1h

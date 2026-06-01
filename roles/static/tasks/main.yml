@@ -1,0 +1,17 @@
+---
+- name: Ensure remote images directory exists
+  ansible.builtin.file:
+    path: "{{ static_remote_dir }}"
+    state: directory
+    owner: "{{ static_owner }}"
+    group: "{{ static_group }}"
+    mode: "0755"
+
+- name: Copy static images to server
+  ansible.builtin.copy:
+    src: "{{ static_local_dir }}/"
+    dest: "{{ static_remote_dir }}/"
+    owner: "{{ static_owner }}"
+    group: "{{ static_group }}"
+    mode: "0644"
+  # Если в files/images ничего нет - copy на пустой папке просто ничего не делает.

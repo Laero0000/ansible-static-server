@@ -1,0 +1,12 @@
+# Эти файлы исполняются/читаются в Linux-контейнере -> только LF,
+# иначе CRLF с Windows ломает bash-скрипты и ssh-ключи/конфиги.
+*.sh    text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
+*.j2    text eol=lf
+*.cfg   text eol=lf
+*.ini   text eol=lf
+*.conf  text eol=lf
+Dockerfile      text eol=lf
+docker-compose.yml text eol=lf
+id_ed25519*     text eol=lf

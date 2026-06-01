@@ -1,0 +1,15 @@
+---
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: "{{ common_update_cache }}"
+    cache_valid_time: "{{ common_cache_valid_time }}"
+
+- name: Upgrade all packages (optional)
+  ansible.builtin.apt:
+    upgrade: dist
+  when: common_full_upgrade | bool
+
+- name: Install additional utilities
+  ansible.builtin.apt:
+    name: "{{ common_packages }}"
+    state: present

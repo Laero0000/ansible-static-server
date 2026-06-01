@@ -1,0 +1,6 @@
+# {{ ansible_managed }}
+# Хардненинг sshd по заданию. Drop-in перекрывает значения из основного sshd_config.
+PermitRootLogin {{ ssh_permit_root_login }}
+PermitEmptyPasswords {{ ssh_permit_empty_passwords }}
+LogLevel {{ ssh_log_level }}
+X11Forwarding {{ ssh_x11_forwarding }}
